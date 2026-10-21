@@ -4,6 +4,7 @@ import { z } from "@medusajs/framework/zod"
 import { BLOCK_TYPES } from "../../../../modules/content/models/content-block"
 import { CONTENT_MODULE } from "../../../../modules/content"
 import type ContentModuleService from "../../../../modules/content/service"
+import { storefrontRevalidator } from "../../../../lib/storefront-revalidate"
 import { parseBlockData } from "../../../../lib/content-blocks"
 
 export const CreateBlockBody = z.object({
@@ -40,5 +41,6 @@ export async function POST(
   if (!parsed.success) throw new MedusaError(MedusaError.Types.INVALID_DATA, parsed.error)
   const service: ContentModuleService = req.scope.resolve(CONTENT_MODULE)
   const block = await service.createContentBlocks({ ...body, data: parsed.data })
+  storefrontRevalidator().request(["content", `content:${block.page}`])
   res.status(201).json({ block })
 }

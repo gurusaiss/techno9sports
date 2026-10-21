@@ -1,5 +1,10 @@
 import type { CreateProductWorkflowInputDTO, ExecArgs } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules, ProductStatus } from "@medusajs/framework/utils"
+import {
+  MedusaError,
+  ContainerRegistrationKeys,
+  Modules,
+  ProductStatus,
+} from "@medusajs/framework/utils"
 import {
   createCollectionsWorkflow,
   createInventoryLevelsWorkflow,
@@ -64,7 +69,10 @@ export default async function seedCatalog({ container }: ExecArgs) {
   const [location] = await stockLocationModule.listStockLocations({})
   const { data: profiles } = await query.graph({ entity: "shipping_profile", fields: ["id"] })
   if (!channel || !location || !profiles[0]) {
-    throw new Error("Run setup-store.ts first (sales channel, warehouse, shipping profile)")
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "Run setup-store.ts first (sales channel, warehouse, shipping profile)",
+    )
   }
 
   // Product types

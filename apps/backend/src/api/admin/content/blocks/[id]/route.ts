@@ -3,6 +3,7 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { z } from "@medusajs/framework/zod"
 import { CONTENT_MODULE } from "../../../../../modules/content"
 import type ContentModuleService from "../../../../../modules/content/service"
+import { storefrontRevalidator } from "../../../../../lib/storefront-revalidate"
 import { parseBlockData } from "../../../../../lib/content-blocks"
 import { CreateBlockBody } from "../route"
 
@@ -28,11 +29,14 @@ export async function POST(
     body.data = parsed.data as Record<string, unknown>
   }
   const block = await service.updateContentBlocks({ id: current.id, ...body })
+  storefrontRevalidator().request(["content", `content:${current.page}`])
   res.json({ block })
 }
 
 export async function DELETE(req: MedusaRequest, res: MedusaResponse) {
   const service: ContentModuleService = req.scope.resolve(CONTENT_MODULE)
+  const current = await service.retrieveContentBlock(req.params.id!)
   await service.deleteContentBlocks(req.params.id!)
+  storefrontRevalidator().request(["content", `content:${current.page}`])
   res.json({ id: req.params.id, deleted: true })
 }

@@ -28,6 +28,10 @@ pnpm + Turborepo; Next.js App Router + TS strict + Tailwind + shadcn/Radix; Medu
 
 Frames = sports eyewear (own category and attributes). Kids = later. IaC = Bicep. Coastal design direction approved.
 
+## Catalogue
+
+Products, prices (rupees), search, content blocks and CSV: docs/catalog-model.md and docs/catalog-csv.md. API contract types live in `packages/types`.
+
 ## Design system
 
 Tokens in `packages/config/tokens.css` (contrast-tested), components in `packages/ui`, preview at `/design`. See `docs/design/design-system.md`.
@@ -36,7 +40,14 @@ Tokens in `packages/config/tokens.css` (contrast-tested), components in `package
 
 - The cloud sandbox is ephemeral: it was reset once and everything uncommitted AND unbundled was lost. Commit often, send bundles.
 - Medusa 2.21.2; Next 16 (read node_modules/next/dist/docs before using new APIs). Medusa stores amounts in major units (rupees), not paise: convert at boundaries.
-- Starter migration script `initial-data-seed` seeds sample region/data: replace in Phase 2 (India, INR).
+- Dev data: `pnpm --filter @t9/backend seed` (store, catalogue, homepage). Start the backend first so the search index is active. Reset = drop the `t9` DB, delete the Meilisearch indexes, migrate, create the admin user, seed.
+- Meilisearch runs natively here (/opt/meili/meilisearch, data /var/lib/t9meili); it is not in Docker. Restart it and Postgres/Redis after a container reset.
+- Medusa model changes need `medusa db:generate <module>`; delete the module's migrations folder INCLUDING `.snapshot-*.json` before regenerating, or you get an ALTER instead of a CREATE.
+- Search index schema change: `pnpm --filter @t9/backend migrate`, then restart the backend (it seeds the new version).
+- Next 16 cache components: pass client components, not functions like `next/link`, from server components; read `searchParams` inside Suspense; `NEXT_PUBLIC_*` env is baked in at build, so server-only values use plain names (MEDUSA_PUBLISHABLE_KEY).
+- Turbopack can serve stale workspace-package code: `rm -rf apps/storefront/.next` before judging a change.
+- Find servers by PID file or listening port, never `pkill -f`/`ps | awk` patterns (they match your own shell).
+- The sandbox blocks `rm -rf <dir>/*`; remove files individually or leave them.
 - No Docker daemon in the sandbox: native Postgres at /var/lib/t9pg (needs recreating after a reset), Redis default.
 - Never `pkill -f` with a pattern that matches your own command line (kills your shell, exit 144). Kill by PID.
 - Radix Dialog only restores focus to a Dialog.Trigger; sheets and the search overlay use `useReturnFocus`. Radix NavigationMenu fails axe; the mega-menu is our own.
@@ -46,4 +57,4 @@ Tokens in `packages/config/tokens.css` (contrast-tested), components in `package
 
 ## Status
 
-Phase 0 and 1 rebuilt after the sandbox reset, all checks green. Phase 2 (catalog) not started.
+Phases 0 and 1 done. Phase 2 (catalogue) built, awaiting owner review: see docs/phase-2-plan.md, docs/catalog-model.md, docs/catalog-csv.md.

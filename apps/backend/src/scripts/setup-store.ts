@@ -1,5 +1,5 @@
 import type { ExecArgs } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { MedusaError, ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import {
   createApiKeysWorkflow,
   createRegionsWorkflow,
@@ -35,7 +35,10 @@ export default async function setupStore({ container }: ExecArgs) {
   // Sales channel
   let [channel] = await salesChannelModule.listSalesChannels({}, { take: 1 })
   if (!channel)
-    throw new Error("No sales channel found. Run `pnpm --filter @t9/backend migrate` first.")
+    throw new MedusaError(
+      MedusaError.Types.INVALID_DATA,
+      "No sales channel found. Run `pnpm --filter @t9/backend migrate` first.",
+    )
   if (channel.name !== "Techno9Sports Web") {
     await updateSalesChannelsWorkflow(container).run({
       input: {
@@ -49,7 +52,7 @@ export default async function setupStore({ container }: ExecArgs) {
 
   // Store: INR only
   const [store] = await storeModule.listStores({}, { take: 1, relations: ["supported_currencies"] })
-  if (!store) throw new Error("No store found")
+  if (!store) throw new MedusaError(MedusaError.Types.INVALID_DATA, "No store found")
   const currencies = store.supported_currencies ?? []
   if (
     currencies.length !== 1 ||

@@ -23,7 +23,11 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run test:unit",
     "migrate": "medusa db:migrate",
-    "user:create": "medusa user"
+    "user:create": "medusa user",
+    "seed:store": "medusa exec ./src/scripts/setup-store.ts",
+    "seed:catalog": "medusa exec ./src/scripts/seed-catalog.ts",
+    "seed:content": "medusa exec ./src/scripts/seed-content.ts",
+    "seed": "pnpm seed:store && pnpm seed:catalog && pnpm seed:content"
   },
   "dependencies": {
     "@medusajs/admin-sdk": "2.21.2",
@@ -36,6 +40,8 @@
     "@medusajs/medusa": "2.21.2",
     "@medusajs/ui": "4.2.6",
     "@tanstack/react-query": "5.64.2",
+    "csv-parse": "^7.0.3",
+    "csv-stringify": "^6.9.0",
     "react-i18next": "13.5.0",
     "react-router-dom": "7.18.2",
     "zod": "4.2.0"
@@ -45,6 +51,7 @@
     "@medusajs/test-utils": "2.21.2",
     "@swc/core": "^1.7.28",
     "@swc/jest": "^0.2.36",
+    "@t9/types": "workspace:*",
     "@types/jest": "^29.5.13",
     "@types/node": "^20.12.11",
     "@types/react": "^18.3.2",
@@ -59,8 +66,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
     "vite": "^7.3.6",
-    "yalc": "^1.0.0-pre.53",
-    "@t9/types": "workspace:*"
+    "yalc": "^1.0.0-pre.53"
   },
   "engines": {
     "node": ">=22.22.0"

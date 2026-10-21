@@ -16,13 +16,21 @@ cp apps/backend/.env.example apps/backend/.env  # set AUTH_MFA_ENCRYPTION_KEY (o
 cp apps/storefront/.env.example apps/storefront/.env.local
 pnpm --filter @t9/backend migrate
 pnpm --filter @t9/backend exec medusa user -e you@example.com -p 'a-strong-password'
+pnpm dev                              # start once so the search index is created
+pnpm --filter @t9/backend seed        # India store, 46 placeholder products, homepage (in another terminal)
 ```
+
+Copy the publishable key printed by `seed:store` into `apps/storefront/.env.local` as `MEDUSA_PUBLISHABLE_KEY`.
 
 ## Run
 
 ```bash
 pnpm dev     # storefront :8000, API :9000, admin :9000/app
 ```
+
+## Bulk catalogue edits
+
+See `docs/catalog-csv.md` (product and stock sheets, validated before import).
 
 ## Checks (same as CI)
 

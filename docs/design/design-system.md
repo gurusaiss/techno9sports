@@ -21,7 +21,9 @@ Change a colour in `tokens.css` and run `pnpm --filter @t9/config test`: 26 chec
 
 ## Components
 
-Button, Badge, Price (paise in, GST-inclusive, MRP and % off), Skeleton, EmptyState, ErrorState, Breadcrumb, ProductCard, SizeSelector, ColorSwatches, FilterDrawer, Sheet, BottomSheet, Toast, Accordion, Tabs, Carousel, Container, Logo (placeholder artwork), AnnouncementBar, UspStrip, SiteHeader (mega-menu, mobile drawer, search overlay), SiteFooter.
+ImageGallery (swipe, thumbnails, zoom lightbox), SizeChartTable, FilterGroups (shared by the mobile drawer and desktop sidebar), Button, Badge, Price (paise in, GST-inclusive, MRP and % off), Skeleton, EmptyState, ErrorState, Breadcrumb, ProductCard, SizeSelector, ColorSwatches, FilterDrawer, Sheet, BottomSheet, Toast, Accordion, Tabs, Carousel, Container, Logo (placeholder artwork), AnnouncementBar, UspStrip, SiteHeader (mega-menu, mobile drawer, search overlay), SiteFooter.
+
+`ProductCard` takes `headingLevel` (2 under a page h1, 3 under a section h2). `SiteHeader` loads the mobile drawer and search overlay on first use.
 
 ## Accessibility (WCAG 2.1 AA)
 

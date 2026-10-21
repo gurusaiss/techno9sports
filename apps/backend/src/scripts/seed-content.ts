@@ -1,5 +1,5 @@
 import type { ExecArgs } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { MedusaError, ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { COLORS } from "../seed/catalog-data"
 import { bannerImage, type BannerTone } from "../seed/placeholder-images"
 import { CONTENT_MODULE } from "../modules/content"
@@ -179,7 +179,11 @@ export default async function seedContent({ container, args }: ExecArgs) {
 
   for (const [i, b] of blocks.entries()) {
     const parsed = parseBlockData(b.type, b.data)
-    if (!parsed.success) throw new Error(`Seed block "${b.label}" is invalid: ${parsed.error}`)
+    if (!parsed.success)
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        `Seed block "${b.label}" is invalid: ${parsed.error}`,
+      )
     await service.createContentBlocks({
       page: "home",
       type: b.type as never,
