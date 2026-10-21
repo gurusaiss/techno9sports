@@ -1,0 +1,17 @@
+{
+  "name": "@t9/config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "tsconfig.base.json",
+    "tokens.css"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "echo 'no ts here'",
+    "lint": "echo 'no lint here'"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  }
+}

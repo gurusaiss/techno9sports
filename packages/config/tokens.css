@@ -1,0 +1,187 @@
+/*
+ * Techno9Sports design tokens: "Coastal" direction (approved by owner).
+ * Single source of truth for colour, type, radius, shadow and motion.
+ * Imported by the storefront (Tailwind v4 @theme). packages/config/tokens.test.ts
+ * checks the colour pairs below against WCAG 2.1 AA, so change values with care.
+ */
+@theme {
+  /* Typeface variables are set by next/font in the storefront layout. */
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand palette */
+  --color-navy: #0f2a43;
+  --color-navy-soft: #16385a;
+  --color-navy-line: #244b73;
+  --color-coral: #ff6b4a;
+  --color-coral-soft: #ffd3c4;
+  --color-coral-tint: #ffb59f;
+  --color-teal: #0e7c86;
+  --color-teal-ink: #0b6770;
+  --color-teal-soft: #cfe8ea;
+  --color-teal-mist: #e3f1f2;
+  --color-sand: #fbf6ee;
+  --color-sand-line: #e7dfd2;
+  --color-sand-deep: #f6e4be;
+  --color-slate: #51647a;
+  --color-slate-line: #7389a0;
+  --color-white: #ffffff;
+
+  /* Semantic roles: components use these, not the brand names */
+  --color-bg: var(--color-sand);
+  --color-surface: var(--color-white);
+  --color-fg: var(--color-navy);
+  --color-muted: var(--color-slate);
+  --color-line: var(--color-sand-line);
+  --color-line-strong: var(--color-slate-line);
+  --color-primary: var(--color-coral);
+  --color-on-primary: var(--color-navy);
+  --color-link: var(--color-teal-ink);
+  --color-focus: var(--color-teal);
+  --color-sale: #c0392b;
+  --color-success: var(--color-teal-ink);
+  --color-warning-bg: #fff1cc;
+  --color-warning-fg: #6b4700;
+
+  /* Radius: controls, cards, large panels; pills use rounded-full */
+  --radius-control: 10px;
+  --radius-card: 18px;
+  --radius-panel: 28px;
+
+  --shadow-card: 0 2px 0 rgb(15 42 67 / 0.06);
+  --shadow-raised: 0 8px 24px rgb(15 42 67 / 0.08);
+  --shadow-pop: 0 20px 50px rgb(15 42 67 / 0.18);
+
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --animate-fade-in: fade-in 150ms var(--ease-standard);
+  --animate-fade-out: fade-out 120ms var(--ease-standard);
+  --animate-sheet-bottom-in: sheet-bottom-in 240ms var(--ease-standard);
+  --animate-sheet-bottom-out: sheet-bottom-out 180ms var(--ease-standard);
+  --animate-sheet-left-in: sheet-left-in 240ms var(--ease-standard);
+  --animate-sheet-left-out: sheet-left-out 180ms var(--ease-standard);
+  --animate-sheet-right-in: sheet-right-in 240ms var(--ease-standard);
+  --animate-sheet-right-out: sheet-right-out 180ms var(--ease-standard);
+  --animate-toast-in: toast-in 200ms var(--ease-standard);
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-menu-in: menu-in 160ms var(--ease-standard);
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes sheet-bottom-in {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @keyframes sheet-bottom-out {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes sheet-left-in {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes sheet-left-out {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes sheet-right-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes sheet-right-out {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

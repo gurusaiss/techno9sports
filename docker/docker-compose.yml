@@ -1,0 +1,25 @@
+name: techno9sports
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: t9, POSTGRES_PASSWORD: t9dev, POSTGRES_DB: t9 }
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U t9"], interval: 5s, retries: 10 }
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    environment: { MEILI_MASTER_KEY: t9-dev-master-key, MEILI_ENV: development }
+    ports: ["7700:7700"]
+    volumes: [meili:/meili_data]
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite-blob --blobHost 0.0.0.0 --skipApiVersionCheck
+    ports: ["10000:10000"]
+    volumes: [azurite:/data]
+  mailpit:
+    image: axllent/mailpit
+    ports: ["1025:1025", "8025:8025"]
+volumes: { pgdata: {}, meili: {}, azurite: {} }

@@ -1,0 +1,15 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+onlyBuiltDependencies:
+  - "@medusajs/telemetry"
+  - "@swc/core"
+  - esbuild
+  - sharp
+  - unrs-resolver
+  - msgpackr-extract
+  - core-js
+overrides:
+  "@types/react": "19.2.0"
+  "@types/react-dom": "19.2.0"

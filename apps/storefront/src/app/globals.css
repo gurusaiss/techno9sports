@@ -1,0 +1,5 @@
+@import "tailwindcss";
+@import "@t9/config/tokens.css";
+
+/* Tailwind must scan the shared UI package for class names. */
+@source "../../../../packages/ui/src";

@@ -1,0 +1,9 @@
+node_modules
+.next
+.medusa
+.turbo
+pnpm-lock.yaml
+dist
+apps/backend/src/admin/**/*.d.ts
+next-env.d.ts
+docs/design/*.html
