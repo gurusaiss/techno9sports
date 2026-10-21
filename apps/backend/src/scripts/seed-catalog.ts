@@ -199,6 +199,9 @@ export default async function seedCatalog({ container }: ExecArgs) {
           ? FABRIC_TECHS.find((t) => t.handle === spec.tech[0])!.name
           : undefined,
         description: spec.description,
+        // Native fields: HSN code for GST invoices, material for the product page.
+        hs_code: spec.hsn,
+        material: spec.fabric,
         status: ProductStatus.PUBLISHED,
         thumbnail: images[0]!.url,
         images,
@@ -228,10 +231,8 @@ export default async function seedCatalog({ container }: ExecArgs) {
         metadata: {
           mrp: spec.mrp,
           gender: spec.gender,
-          hsn_code: spec.hsn,
           attributes: spec.attrs,
           features: spec.features,
-          fabric: spec.fabric,
           color_hex: Object.fromEntries(spec.colors.map((c) => [c, COLORS[c]])),
           bestseller_rank: spec.rank ?? 999,
         },

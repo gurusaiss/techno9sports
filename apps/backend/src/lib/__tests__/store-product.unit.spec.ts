@@ -22,10 +22,11 @@ const raw = {
   handle: "everyday-dry-tee",
   title: "Everyday Dry Tee",
   created_at: "2026-01-01T00:00:00.000Z",
+  hs_code: "6109",
+  material: "100% polyester",
   metadata: {
     mrp: 899,
     gender: "men",
-    hsn_code: "6109",
     bestseller_rank: 1,
     features: ["Quick-dry"],
     attributes: { fit: "Regular" },
@@ -69,7 +70,8 @@ describe("toStoreProduct", () => {
     const json = JSON.stringify(p)
     expect(json).not.toContain("6109")
     expect(json).not.toContain("bestseller_rank")
-    expect(json).not.toContain("hsn")
+    expect(json).not.toContain("hs_code")
+    expect(p.fabric).toBe("100% polyester")
   })
 
   it("reports per-variant availability without leaking large stock counts", () => {

@@ -24,6 +24,7 @@ export const STORE_PRODUCT_FIELDS = [
   "status",
   "created_at",
   "metadata",
+  "material",
   "images.url",
   "images.metadata",
   "options.title",
@@ -105,7 +106,7 @@ export function toStoreProduct(p: Row) {
     gender: (meta.gender as string | undefined) ?? null,
     attributes: (meta.attributes ?? {}) as Record<string, string>,
     features: (Array.isArray(meta.features) ? meta.features : []) as string[],
-    fabric: (meta.fabric as string | undefined) ?? null,
+    fabric: (p.material as string | null) ?? null,
     color_hex: (meta.color_hex ?? {}) as Record<string, string>,
     in_stock: variants.some((v) => v.availability.status !== "out_of_stock"),
     images: (p.images ?? []).map((i: Row) => ({

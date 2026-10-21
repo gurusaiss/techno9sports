@@ -29,6 +29,7 @@ module.exports = defineConfig({
   modules: [
     { resolve: "./src/modules/fabric-technology" },
     { resolve: "./src/modules/size-chart" },
+    { resolve: "./src/modules/content" },
     {
       resolve: "@medusajs/medusa/search",
       options: { providers: [searchProvider], default_provider: searchProvider.id },

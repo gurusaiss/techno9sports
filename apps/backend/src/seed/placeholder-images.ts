@@ -65,3 +65,34 @@ export async function placeholderImage(
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"><rect width="800" height="1000" fill="${bg}"/><ellipse cx="400" cy="900" rx="230" ry="26" fill="#0f2a43" opacity=".08"/><g transform="translate(${x} ${y}) scale(${scale})">${glyphSvg(glyph, colorHex)}</g>${weave}</svg>`
   return sharp(Buffer.from(svg)).webp({ quality: 78 }).toBuffer()
 }
+
+export type BannerTone = "sunrise" | "lagoon" | "dune"
+
+const BANNER_BG: Record<BannerTone, [string, string]> = {
+  sunrise: ["#ffd9b8", "#7fc4c9"],
+  lagoon: ["#cfe8ea", "#0e7c86"],
+  dune: ["#f6e4be", "#ff6b4a"],
+}
+
+/** Wide banner art: gradient, sun, wave and one or two garments. No text: copy is HTML in the storefront. */
+export async function bannerImage(
+  tone: BannerTone,
+  items: { glyph: Glyph; color: string }[],
+  width: number,
+  height: number,
+): Promise<Buffer> {
+  const [a, b] = BANNER_BG[tone]
+  const unit = Math.min(width, height) / 120
+  const size = 120 * unit * (width > height ? 0.8 : 0.62)
+  const placed = items
+    .map((it, i) => {
+      const x =
+        width > height ? width * (0.42 + i * 0.26) - size / 2 : width * (0.32 + i * 0.36) - size / 2
+      const y = height * (i % 2 === 0 ? 0.12 : 0.34)
+      const scale = (size / 120) * (i === 0 ? 1 : 0.78)
+      return `<g transform="translate(${x} ${y}) scale(${scale}) rotate(${i === 0 ? -6 : 7} 60 60)">${glyphSvg(it.glyph, it.color)}</g>`
+    })
+    .join("")
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="${width}" height="${height}" fill="url(#g)"/><circle cx="${width * 0.82}" cy="${height * 0.28}" r="${height * 0.2}" fill="#ffffff" opacity=".35"/><path d="M0 ${height * 0.82} Q${width * 0.25} ${height * 0.7} ${width * 0.5} ${height * 0.82} T${width} ${height * 0.82} V${height} H0Z" fill="#0f2a43" opacity=".14"/>${placed}</svg>`
+  return sharp(Buffer.from(svg)).webp({ quality: 80 }).toBuffer()
+}
