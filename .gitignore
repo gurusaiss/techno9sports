@@ -11,3 +11,4 @@ coverage
 .DS_Store
 .local
 next-env.d.ts
+apps/backend/static
