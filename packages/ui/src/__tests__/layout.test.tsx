@@ -66,6 +66,25 @@ describe("SiteHeader", () => {
 })
 
 describe("SearchOverlay", () => {
+  it("accepts async suggestions and ignores stale answers", async () => {
+    const user = userEvent.setup()
+    const slow = (q: string) =>
+      new Promise<{ label: string; href: string; kind: "product" }[]>((resolve) =>
+        setTimeout(
+          () => resolve([{ label: `Result for ${q}`, href: `/s/${q}`, kind: "product" }]),
+          q === "ab" ? 400 : 10,
+        ),
+      )
+    render(<Header search={{ getSuggestions: slow, onSelect: () => {} }} />)
+    await user.click(searchButton())
+    const input = await screen.findByRole("combobox", { name: "Search" })
+    await user.type(input, "ab")
+    await user.type(input, "c")
+    expect(await screen.findByRole("option", { name: /Result for abc/ })).toBeInTheDocument()
+    await new Promise((r) => setTimeout(r, 600))
+    expect(screen.queryByRole("option", { name: /Result for ab\b(?!c)/ })).toBeNull()
+  })
+
   it("filters suggestions, navigates with arrows, selects with Enter", async () => {
     const user = userEvent.setup()
     const onSelect = vi.fn()
@@ -86,7 +105,7 @@ describe("SearchOverlay", () => {
     expect(input).toHaveFocus()
     expect(within(dialog).getByRole("button", { name: "joggers" })).toBeInTheDocument()
     await user.type(input, "t")
-    const options = within(dialog).getAllByRole("option")
+    const options = await within(dialog).findAllByRole("option")
     expect(options.length).toBe(2)
     expect(input).toHaveAttribute("aria-expanded", "true")
     await user.keyboard("{ArrowDown}{ArrowDown}")
@@ -104,7 +123,7 @@ describe("SearchOverlay", () => {
     await user.click(searchButton())
     const input = await screen.findByRole("combobox", { name: "Search" })
     await user.type(input, "yoga mat")
-    expect(screen.getByRole("status")).toHaveTextContent("No suggestions")
+    expect(await screen.findByRole("status")).toHaveTextContent("No suggestions")
     await user.keyboard("{Enter}")
     expect(onSelect).toHaveBeenCalledWith({ query: "yoga mat" })
   })

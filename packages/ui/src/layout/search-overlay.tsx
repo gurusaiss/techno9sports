@@ -15,13 +15,16 @@ export interface SearchSuggestion {
 export interface SearchOverlayProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** Return suggestions for the typed query (the storefront calls Meilisearch from Phase 2). */
-  getSuggestions?: (query: string) => SearchSuggestion[]
+  /** Suggestions for the typed query. May be async; calls are debounced and stale answers dropped. */
+  getSuggestions?: (query: string) => SearchSuggestion[] | Promise<SearchSuggestion[]>
   recentSearches?: string[]
   onClearRecent?: () => void
   /** Called when the user chooses a suggestion or presses Enter on free text. */
   onSelect: (target: { href: string } | { query: string }) => void
 }
+
+const EMPTY_SUGGESTIONS: SearchSuggestion[] = []
+const SUGGEST_DEBOUNCE_MS = 120
 
 export function SearchOverlay({ open, onOpenChange, ...rest }: SearchOverlayProps) {
   return (
@@ -46,14 +49,36 @@ function SearchPanel({
   const [query, setQuery] = React.useState("")
   const [active, setActive] = React.useState(-1)
   const listId = React.useId()
-  const suggestions = React.useMemo(
-    () => (query.trim() && getSuggestions ? getSuggestions(query.trim()) : []),
-    [query, getSuggestions],
-  )
+  const trimmed = query.trim()
+  // Answers are stored with the query they belong to, so a stale answer is never shown.
+  const [answer, setAnswer] = React.useState<{ q: string; items: SearchSuggestion[] }>({
+    q: "",
+    items: [],
+  })
+  const settled = answer.q === trimmed
+  const suggestions = settled && trimmed ? answer.items : EMPTY_SUGGESTIONS
+
+  React.useEffect(() => {
+    if (!trimmed || !getSuggestions) return
+    let cancelled = false
+    const timer = window.setTimeout(async () => {
+      let items: SearchSuggestion[] = []
+      try {
+        items = await getSuggestions(trimmed)
+      } catch {
+        items = []
+      }
+      if (!cancelled) setAnswer({ q: trimmed, items })
+    }, SUGGEST_DEBOUNCE_MS)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [trimmed, getSuggestions])
 
   React.useEffect(() => {
     setActive(-1)
-  }, [query])
+  }, [suggestions])
 
   const choose = (s: SearchSuggestion) => {
     onSelect({ href: s.href })
@@ -169,7 +194,7 @@ function SearchPanel({
           </ul>
         </section>
       ) : null}
-      {query.trim() && suggestions.length === 0 ? (
+      {trimmed && settled && suggestions.length === 0 ? (
         <p role="status" className="mt-4 text-muted">
           No suggestions. Press Enter to search for “{query.trim()}”.
         </p>
