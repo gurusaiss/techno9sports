@@ -130,6 +130,52 @@ export async function resolveProductIds(
       )
     case "sales-channel":
       return productIdsInSalesChannels(query, ids)
+    case "inventory-level": {
+      // Stock changes move a product in or out of stock, and a size in or out of the size filter.
+      const items = await relatedProductIds(
+        query,
+        "inventory_level",
+        ["inventory_item_id"],
+        ids,
+        (row) => [row.inventory_item_id],
+        deleted,
+      )
+      return relatedProductIds(
+        query,
+        "inventory_item",
+        ["variants.product_id"],
+        items,
+        (row) => (row.variants ?? []).map((v: any) => v?.product_id),
+        false,
+      )
+    }
+    case "inventory-item":
+      return relatedProductIds(
+        query,
+        "inventory_item",
+        ["variants.product_id"],
+        ids,
+        (row) => (row.variants ?? []).map((v: any) => v?.product_id),
+        deleted,
+      )
+    case "fabric-technology":
+      return relatedProductIds(
+        query,
+        "fabric_technology",
+        ["products.id"],
+        ids,
+        (row) => (row.products ?? []).map((product: any) => product?.id),
+        deleted,
+      )
+    case "size-chart":
+      return relatedProductIds(
+        query,
+        "size_chart",
+        ["products.id"],
+        ids,
+        (row) => (row.products ?? []).map((product: any) => product?.id),
+        deleted,
+      )
     default:
       return []
   }
