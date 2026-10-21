@@ -3,8 +3,14 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { AnnouncementBar, SiteFooter, SiteHeader, type SearchSuggestion } from "@t9/ui"
-import { footerColumns, nav, sampleSuggestions, secondaryNav } from "@/config/site"
+import {
+  AnnouncementBar,
+  SiteFooter,
+  SiteHeader,
+  type NavItem,
+  type SearchSuggestion,
+} from "@t9/ui"
+import { footerColumns, secondaryNav } from "@/config/site"
 
 const RECENT_KEY = "t9.recentSearches"
 const RECENT_EVENT = "t9:recent-searches"
@@ -54,14 +60,44 @@ function subscribeRecent(onChange: () => void) {
   }
 }
 
-export function SiteHeaderChrome() {
+/** Category and section names from the menu, so "tees" can suggest the T-shirts pages. */
+function categorySuggestions(nav: NavItem[], q: string): SearchSuggestion[] {
+  const needle = q.toLowerCase()
+  const out: SearchSuggestion[] = []
+  for (const item of nav) {
+    for (const col of item.columns ?? []) {
+      for (const link of col.links) {
+        if (`${item.label} ${link.label}`.toLowerCase().includes(needle)) {
+          out.push({ label: `${item.label} ${link.label}`, href: link.href, kind: "category" })
+        }
+      }
+    }
+  }
+  return out.slice(0, 3)
+}
+
+export function SiteHeaderChrome({
+  nav,
+  announcement,
+}: {
+  nav: NavItem[]
+  announcement?: { text: string; href?: string }
+}) {
   const router = useRouter()
   const recent = React.useSyncExternalStore(subscribeRecent, getRecent, () => EMPTY)
 
   const getSuggestions = React.useCallback(
-    (q: string): SearchSuggestion[] =>
-      sampleSuggestions.filter((s) => s.label.toLowerCase().includes(q.toLowerCase())).slice(0, 6),
-    [],
+    async (q: string): Promise<SearchSuggestion[]> => {
+      const categories = categorySuggestions(nav, q)
+      try {
+        const res = await fetch(`/api/suggest?q=${encodeURIComponent(q)}`)
+        const data = (await res.json()) as { suggestions?: SearchSuggestion[] }
+        return [...categories, ...(data.suggestions ?? [])]
+      } catch {
+        return categories
+      }
+    },
+    [nav],
   )
 
   return (
@@ -71,9 +107,17 @@ export function SiteHeaderChrome() {
       cartCount={0}
       linkAs={Link}
       announcement={
-        <AnnouncementBar>
-          Extra 10% off your first order with code <b>FIRST10</b> · Free shipping above ₹999
-        </AnnouncementBar>
+        announcement ? (
+          <AnnouncementBar>
+            {announcement.href ? (
+              <Link href={announcement.href} className="underline-offset-4 hover:underline">
+                {announcement.text}
+              </Link>
+            ) : (
+              announcement.text
+            )}
+          </AnnouncementBar>
+        ) : null
       }
       search={{
         getSuggestions,

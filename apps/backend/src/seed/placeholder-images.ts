@@ -83,11 +83,11 @@ export async function bannerImage(
 ): Promise<Buffer> {
   const [a, b] = BANNER_BG[tone]
   const unit = Math.min(width, height) / 120
-  const size = 120 * unit * (width > height ? 0.8 : 0.62)
+  const size = 120 * unit * (width > height ? 0.74 : 0.62)
   const placed = items
     .map((it, i) => {
       const x =
-        width > height ? width * (0.42 + i * 0.26) - size / 2 : width * (0.32 + i * 0.36) - size / 2
+        width > height ? width * (0.64 + i * 0.19) - size / 2 : width * (0.32 + i * 0.36) - size / 2
       const y = height * (i % 2 === 0 ? 0.12 : 0.34)
       const scale = (size / 120) * (i === 0 ? 1 : 0.78)
       return `<g transform="translate(${x} ${y}) scale(${scale}) rotate(${i === 0 ? -6 : 7} 60 60)">${glyphSvg(it.glyph, it.color)}</g>`

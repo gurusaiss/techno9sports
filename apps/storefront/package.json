@@ -11,13 +11,14 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@t9/config": "workspace:*",
+    "@t9/types": "workspace:*",
+    "@t9/ui": "workspace:*",
+    "lucide-react": "^1.60.0",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "@t9/types": "workspace:*",
-    "@t9/ui": "workspace:*",
-    "@t9/config": "workspace:*",
-    "lucide-react": "^1.60.0"
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

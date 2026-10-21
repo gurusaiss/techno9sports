@@ -84,7 +84,7 @@ const productFields = search.define({
   colors: keywordArrayFacet(),
   /** "Navy:#0f2a43" pairs, for swatches on cards. Not filterable. */
   color_swatches: search.keyword().array().retrievable(),
-  in_stock: search.boolean().filterable().facetable().retrievable(),
+  in_stock: search.boolean().filterable().sortable().facetable().retrievable(),
 
   mrp: search.float().filterable().sortable().retrievable(),
   discount_percent: search

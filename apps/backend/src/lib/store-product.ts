@@ -1,17 +1,7 @@
+import type { StoreProduct, StoreVariant } from "@t9/types"
 import { availabilityOf, type InventoryVariantRow } from "./availability"
 
 type Row = Record<string, any>
-
-export interface StoreVariant {
-  id: string
-  sku: string | null
-  title: string
-  size: string | null
-  color: string | null
-  /** Rupees, GST-inclusive. */
-  price: number | null
-  availability: ReturnType<typeof availabilityOf>
-}
 
 /** Raw graph fields the product page needs. Keep in sync with `toStoreProduct`. */
 export const STORE_PRODUCT_FIELDS = [
@@ -71,7 +61,7 @@ const optionOf = (variant: Row, title: string): string | null =>
  * The product page response. Admin-only metadata (HSN code, bestseller rank) is left out on
  * purpose, and exact stock is only revealed when it is low.
  */
-export function toStoreProduct(p: Row) {
+export function toStoreProduct(p: Row): StoreProduct {
   const meta = (p.metadata ?? {}) as Record<string, any>
   const variants: StoreVariant[] = (p.variants ?? []).map((v: Row) => ({
     id: v.id,
@@ -154,5 +144,3 @@ export function toStoreProduct(p: Row) {
       : null,
   }
 }
-
-export type StoreProduct = ReturnType<typeof toStoreProduct>

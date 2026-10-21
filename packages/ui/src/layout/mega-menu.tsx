@@ -68,7 +68,7 @@ export function MegaMenu({
       onKeyDown={onKeyDown}
       onBlur={onBlur}
     >
-      <ul className="flex items-center gap-5">
+      <ul className="flex items-center gap-3 xl:gap-5">
         {items.map((item, i) => {
           const panelId = `${baseId}-panel-${i}`
           const open = openLabel === item.label

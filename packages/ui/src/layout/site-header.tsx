@@ -5,8 +5,7 @@ import { Heart, Menu, Search, ShoppingBag, User } from "lucide-react"
 import { Container } from "./container"
 import { Logo } from "./logo"
 import { MegaMenu } from "./mega-menu"
-import { MobileDrawer } from "./mobile-drawer"
-import { SearchOverlay, type SearchOverlayProps } from "./search-overlay"
+import type { SearchOverlayProps } from "./search-overlay"
 import type { NavItem, NavLink } from "./nav-types"
 
 export interface SiteHeaderProps {
@@ -23,6 +22,14 @@ export interface SiteHeaderProps {
   linkAs?: React.ElementType
 }
 
+// The drawer and search overlay are only needed after a tap, so their code loads on first use.
+const MobileDrawer = React.lazy(() =>
+  import("./mobile-drawer").then((m) => ({ default: m.MobileDrawer })),
+)
+const SearchOverlay = React.lazy(() =>
+  import("./search-overlay").then((m) => ({ default: m.SearchOverlay })),
+)
+
 const iconBtn = "relative grid size-11 place-items-center rounded-full hover:bg-teal-mist"
 
 export function SiteHeader({
@@ -37,8 +44,15 @@ export function SiteHeader({
   announcement,
   linkAs: Link = "a",
 }: SiteHeaderProps) {
+  const menuMounted = React.useRef(false)
+  const searchMounted = React.useRef(false)
   const [menuOpen, setMenuOpen] = React.useState(false)
   const [searchOpen, setSearchOpen] = React.useState(false)
+  // Mounted from the first open on, so closing still animates and focus returns.
+  const menuEver = menuOpen || menuMounted.current
+  const searchEver = searchOpen || searchMounted.current
+  if (menuOpen) menuMounted.current = true
+  if (searchOpen) searchMounted.current = true
 
   return (
     <>
@@ -63,14 +77,14 @@ export function SiteHeader({
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="hidden h-11 min-w-56 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm text-muted lg:flex"
+              className="hidden h-11 min-w-56 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm text-muted 2xl:flex"
             >
               <Search className="size-[18px]" aria-hidden />
               Search tees, joggers, frames
             </button>
             <button
               type="button"
-              className={`${iconBtn} lg:hidden`}
+              className={`${iconBtn} 2xl:hidden`}
               aria-label="Search"
               onClick={() => setSearchOpen(true)}
             >
@@ -104,14 +118,20 @@ export function SiteHeader({
           </div>
         </Container>
       </header>
-      <MobileDrawer
-        open={menuOpen}
-        onOpenChange={setMenuOpen}
-        items={nav}
-        secondary={secondaryNav}
-        linkAs={Link}
-      />
-      <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} {...search} />
+      <React.Suspense fallback={null}>
+        {menuEver ? (
+          <MobileDrawer
+            open={menuOpen}
+            onOpenChange={setMenuOpen}
+            items={nav}
+            secondary={secondaryNav}
+            linkAs={Link}
+          />
+        ) : null}
+        {searchEver ? (
+          <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} {...search} />
+        ) : null}
+      </React.Suspense>
     </>
   )
 }

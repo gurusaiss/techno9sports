@@ -2,6 +2,7 @@
 const PATHS = {
   tee: "M40 12 L18 24 L6 46 L26 54 L32 46 L32 108 L88 108 L88 46 L94 54 L114 46 L102 24 L80 12 C76 22 68 26 60 26 C52 26 44 22 40 12Z",
   pants: "M34 10 H86 L92 110 H66 L60 48 L54 110 H28Z",
+  bra: "M30 30 Q44 20 54 36 Q60 42 66 36 Q76 20 90 30 L92 66 Q76 80 60 76 Q44 80 28 66Z",
   cap: "M22 74 C22 40 44 28 62 28 C82 28 98 42 98 74 Z M96 74 C112 72 120 80 120 84 C108 82 98 82 92 82Z",
 } as const
 
@@ -22,8 +23,7 @@ export function PlaceholderMedia({
     <div
       className="grid size-full place-items-center"
       style={{ backgroundColor: bg }}
-      role="img"
-      aria-label={label}
+      {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
     >
       <svg viewBox="0 0 120 120" className="h-auto w-[56%]" aria-hidden>
         {kind === "frames" ? (

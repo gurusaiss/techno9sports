@@ -26,6 +26,8 @@ export interface ProductCardProps {
   onNotify?: () => void
   /** Swap in a router link (for example next/link). */
   linkAs?: React.ElementType
+  /** Heading level of the title: 2 on listing pages (under the page h1), 3 under a section h2. */
+  headingLevel?: 2 | 3
   className?: string
 }
 
@@ -44,8 +46,10 @@ export function ProductCard({
   onWishlistToggle,
   onNotify,
   linkAs: Link = "a",
+  headingLevel = 3,
   className,
 }: ProductCardProps) {
+  const Heading = `h${headingLevel}` as "h2" | "h3"
   return (
     <article className={cn("group relative", className)}>
       <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-teal-soft shadow-card">
@@ -85,14 +89,14 @@ export function ProductCard({
           </button>
         ) : null}
       </div>
-      <h3 className="mt-3 text-[15px] font-semibold leading-snug">
+      <Heading className="mt-3 text-[15px] font-semibold leading-snug">
         <Link
           href={href}
           className="rounded-control after:absolute after:inset-0 after:content-['']"
         >
           {title}
         </Link>
-      </h3>
+      </Heading>
       {meta ? <p className="text-[13px] text-muted">{meta}</p> : null}
       <Price pricePaise={pricePaise} mrpPaise={mrpPaise} className="mt-1" />
       {colors?.length ? (
