@@ -27,6 +27,7 @@ import { placeholderImage } from "../seed/placeholder-images"
 const slug = (s: string) =>
   s
     .toLowerCase()
+    .replace(/['’]/g, "")
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "")

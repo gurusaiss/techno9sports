@@ -2,6 +2,7 @@ import type { SearchTypes } from "@medusajs/framework/types"
 import { defineSearchIndex, graphConsume, graphSeed, search } from "@medusajs/framework/utils"
 
 import { ProductOptionRow, toOptionValues } from "./helpers/option-values"
+import { isVariantAvailable as available } from "../lib/availability"
 import { loadPricing, priceFields, toProductPricing } from "./helpers/pricing"
 import { resolveProductIds } from "./helpers/resolve-product-ids"
 
@@ -100,17 +101,6 @@ type ProductDocument = SearchTypes.InferSearchDocumentType<typeof productFields>
 
 const text = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null)
 const uniq = <T>(list: T[]) => Array.from(new Set(list))
-
-function available(variant: Row): boolean {
-  if (variant.manage_inventory === false || variant.allow_backorder === true) return true
-  let onHand = 0
-  for (const item of variant.inventory_items ?? []) {
-    for (const level of item?.inventory?.location_levels ?? []) {
-      onHand += Number(level?.stocked_quantity ?? 0) - Number(level?.reserved_quantity ?? 0)
-    }
-  }
-  return onHand > 0
-}
 
 function toDocument(
   product: Row,
