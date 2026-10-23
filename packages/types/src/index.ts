@@ -4,3 +4,4 @@ export type PaymentMethod = "razorpay" | "cod"
 export type Paise = number
 
 export * from "./catalog"
+export * from "./cart"

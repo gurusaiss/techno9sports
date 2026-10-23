@@ -1,0 +1,40 @@
+pincode,city,district,state,serviceable,cod_allowed,days_min,days_max
+110001,New Delhi,New Delhi,Delhi,true,true,3,5
+400001,Mumbai,Mumbai,Maharashtra,true,true,3,5
+400050,Mumbai,Mumbai,Maharashtra,true,true,3,5
+411001,Pune,Pune,Maharashtra,true,true,3,5
+440001,Nagpur,Nagpur,Maharashtra,true,true,4,6
+560001,Bengaluru,Bengaluru Urban,Karnataka,true,true,2,4
+560034,Bengaluru,Bengaluru Urban,Karnataka,true,true,2,4
+600001,Chennai,Chennai,Tamil Nadu,true,true,3,5
+641001,Coimbatore,Coimbatore,Tamil Nadu,true,true,3,5
+625001,Madurai,Madurai,Tamil Nadu,true,true,3,6
+700001,Kolkata,Kolkata,West Bengal,true,true,4,6
+500001,Hyderabad,Hyderabad,Telangana,true,true,2,4
+500081,Hyderabad,Rangareddy,Telangana,true,true,2,4
+530001,Visakhapatnam,Visakhapatnam,Andhra Pradesh,true,true,1,3
+520001,Vijayawada,Krishna,Andhra Pradesh,true,true,2,4
+522002,Guntur,Guntur,Andhra Pradesh,true,true,2,4
+533101,Rajahmundry,East Godavari,Andhra Pradesh,true,true,2,4
+517501,Tirupati,Tirupati,Andhra Pradesh,true,true,2,4
+380001,Ahmedabad,Ahmedabad,Gujarat,true,true,3,5
+395003,Surat,Surat,Gujarat,true,true,3,5
+302001,Jaipur,Jaipur,Rajasthan,true,true,3,6
+226001,Lucknow,Lucknow,Uttar Pradesh,true,true,4,6
+201301,Noida,Gautam Buddha Nagar,Uttar Pradesh,true,true,3,5
+122001,Gurugram,Gurugram,Haryana,true,true,3,5
+160017,Chandigarh,Chandigarh,Chandigarh,true,true,3,6
+141001,Ludhiana,Ludhiana,Punjab,true,true,4,6
+248001,Dehradun,Dehradun,Uttarakhand,true,true,4,7
+682001,Kochi,Ernakulam,Kerala,true,true,3,5
+695001,Thiruvananthapuram,Thiruvananthapuram,Kerala,true,true,3,6
+452001,Indore,Indore,Madhya Pradesh,true,true,4,6
+462001,Bhopal,Bhopal,Madhya Pradesh,true,true,4,6
+492001,Raipur,Raipur,Chhattisgarh,true,true,4,7
+800001,Patna,Patna,Bihar,true,true,4,7
+834001,Ranchi,Ranchi,Jharkhand,true,true,4,7
+751001,Bhubaneswar,Khordha,Odisha,true,true,3,6
+781001,Guwahati,Kamrup Metropolitan,Assam,true,false,5,8
+190001,Srinagar,Srinagar,Jammu and Kashmir,true,false,6,9
+403001,Panaji,North Goa,Goa,true,true,3,5
+605001,Puducherry,Puducherry,Puducherry,true,true,3,6

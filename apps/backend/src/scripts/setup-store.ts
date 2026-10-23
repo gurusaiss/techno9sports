@@ -8,9 +8,12 @@ import {
   createTaxRegionsWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
   linkSalesChannelsToStockLocationWorkflow,
+  updateShippingOptionsWorkflow,
   updateSalesChannelsWorkflow,
   updateStoresWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { getSetting } from "../lib/settings"
+import { standardShippingPrices } from "../lib/shipping-prices"
 
 /**
  * India / INR store setup. Safe to run repeatedly: every step checks before it creates.
@@ -93,23 +96,28 @@ export default async function setupStore({ container }: ExecArgs) {
   const taxRegions = await taxModule.listTaxRegions({ country_code: "in" })
   if (!taxRegions.length) {
     await createTaxRegionsWorkflow(container).run({
-      input: [{ country_code: "in", provider_id: "tp_system" }],
+      input: [{ country_code: "in", provider_id: "tp_gst_gst" }],
     })
-    logger.info("Created tax region IN (GST rates are configured in Phase 3)")
+    logger.info("Created tax region IN (GST provider)")
+  } else if (taxRegions[0]!.provider_id !== "tp_gst_gst") {
+    await taxModule.updateTaxRegions({ id: taxRegions[0]!.id, provider_id: "tp_gst_gst" })
+    logger.info("Switched tax region IN to the GST provider")
   }
 
-  // Prices are GST-inclusive
-  const prefs = await pricingModule.listPricePreferences({
-    attribute: "currency_code",
-    value: "inr",
-  })
-  if (!prefs.length) {
-    await pricingModule.createPricePreferences({
-      attribute: "currency_code",
-      value: "inr",
-      is_tax_inclusive: true,
-    })
-    logger.info("INR prices are tax-inclusive")
+  // Prices are GST-inclusive. Creating a region adds its own preference (tax-exclusive), and a
+  // region preference beats a currency one, so both must be set and re-checked on every run.
+  for (const pref of [
+    { attribute: "currency_code", value: "inr" },
+    { attribute: "region_id", value: region.id },
+  ]) {
+    const [existing] = await pricingModule.listPricePreferences(pref)
+    if (!existing) {
+      await pricingModule.createPricePreferences({ ...pref, is_tax_inclusive: true })
+      logger.info(`Price preference ${pref.attribute}=${pref.value}: tax-inclusive`)
+    } else if (!existing.is_tax_inclusive) {
+      await pricingModule.updatePricePreferences(existing.id, { is_tax_inclusive: true })
+      logger.info(`Price preference ${pref.attribute}=${pref.value}: switched to tax-inclusive`)
+    }
   }
 
   // Publishable key for the storefront
@@ -172,10 +180,7 @@ export default async function setupStore({ container }: ExecArgs) {
           service_zone_id: fulfillmentSet.service_zones[0]!.id,
           shipping_profile_id: profiles[0]!.id,
           type: { label: "Standard", description: "Delivered in 3 to 7 days.", code: "standard" },
-          prices: [
-            { currency_code: "inr", amount: 49 },
-            { region_id: region.id, amount: 49 },
-          ],
+          prices: standardShippingPrices(await getSetting(container, "shipping"), region.id),
           rules: [
             { attribute: "enabled_in_store", value: "true", operator: "eq" },
             { attribute: "is_return", value: "false", operator: "eq" },
@@ -184,6 +189,19 @@ export default async function setupStore({ container }: ExecArgs) {
       ],
     })
     logger.info("Created warehouse, fulfillment set and a placeholder delivery option")
+  }
+
+  // Keep the delivery price rows in step with the shipping setting (fee and free threshold).
+  const [option] = await fulfillmentModule.listShippingOptions({ name: "Standard delivery" })
+  if (option) {
+    await updateShippingOptionsWorkflow(container).run({
+      input: [
+        {
+          id: option.id,
+          prices: standardShippingPrices(await getSetting(container, "shipping"), region.id),
+        },
+      ],
+    })
   }
 
   logger.info(`Publishable API key: ${key.token}`)

@@ -30,6 +30,16 @@ module.exports = defineConfig({
     { resolve: "./src/modules/fabric-technology" },
     { resolve: "./src/modules/size-chart" },
     { resolve: "./src/modules/content" },
+    { resolve: "./src/modules/store-settings" },
+    { resolve: "./src/modules/otp" },
+    { resolve: "./src/modules/pincode" },
+    { resolve: "./src/modules/wishlist" },
+    {
+      resolve: "@medusajs/medusa/tax",
+      options: {
+        providers: [{ resolve: "./src/modules/gst-tax", id: "gst" }],
+      },
+    },
     {
       resolve: "@medusajs/medusa/search",
       options: { providers: [searchProvider], default_provider: searchProvider.id },

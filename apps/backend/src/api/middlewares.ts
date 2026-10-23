@@ -1,8 +1,12 @@
+import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import {
+  authenticate,
   configureStoreSearch,
   defineMiddlewares,
   validateAndTransformBody,
 } from "@medusajs/framework/http"
+import { tooManyRequests } from "../lib/http"
+import { LIMITS } from "../lib/rate-limit"
 import { CreateBlockBody } from "./admin/content/blocks/route"
 import { UpdateBlockBody } from "./admin/content/blocks/[id]/route"
 import { ImportBody } from "./admin/catalog/import/route"
@@ -21,6 +25,18 @@ export default defineMiddlewares({
           },
         }),
       ],
+    },
+    {
+      method: ["POST"],
+      matcher: "/store/carts/:id/promotions",
+      middlewares: [
+        (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) =>
+          tooManyRequests(req, res, LIMITS.couponIp) ? undefined : next(),
+      ],
+    },
+    {
+      matcher: "/store/wishlist*",
+      middlewares: [authenticate("customer", ["session", "bearer"])],
     },
     {
       method: ["POST"],
