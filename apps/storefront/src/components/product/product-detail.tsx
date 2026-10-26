@@ -17,9 +17,15 @@ import {
   TabsTrigger,
   useToast,
 } from "@t9/ui"
+import { Heart } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { lookupPincodeAction } from "@/app/actions/checkout"
+import { useCart } from "@/components/cart/cart-provider"
 import { ProductImage } from "@/components/product-image"
+import { useWishlist } from "@/components/wishlist-provider"
 import { colorHex } from "@/config/colors"
 import { rupeesToPaise } from "@/lib/money"
+import { trackRecentlyViewed } from "@/lib/recently-viewed"
 import { setUrlParam, useUrlParam } from "@/lib/use-url-param"
 
 const PINCODE = /^[1-9][0-9]{5}$/
@@ -39,6 +45,19 @@ function variantFor(
  */
 export function ProductDetail({ product }: { product: StoreProduct }) {
   const { toast } = useToast()
+  const router = useRouter()
+  const { add, busy } = useCart()
+  const wishlist = useWishlist()
+  const [buying, setBuying] = React.useState(false)
+  React.useEffect(() => {
+    trackRecentlyViewed({
+      handle: product.handle,
+      title: product.title,
+      thumbnail: product.images[0]?.url ?? null,
+      price: product.price,
+      mrp: product.mrp,
+    })
+  }, [product])
   const colors = product.options.find((o) => o.title === "Color")?.values ?? []
   const sizes = product.options.find((o) => o.title === "Size")?.values ?? []
 
@@ -116,12 +135,12 @@ export function ProductDetail({ product }: { product: StoreProduct }) {
     sizeGroupRef.current?.querySelector<HTMLElement>('[role="radio"]:not([disabled])')?.focus()
     return false
   }
-  const addToBag = () => {
-    if (!requireSize()) return
-    toast({
-      title: "Bag opens in Phase 3",
-      description: `${product.title}, ${size} / ${color}. Cart and checkout are the next phase.`,
-    })
+  const addToBag = async (buyNow = false) => {
+    if (!requireSize() || !variant) return
+    if (buyNow) setBuying(true)
+    const ok = await add(variant.id, 1, { openDrawer: !buyNow })
+    setBuying(false)
+    if (ok && buyNow) router.push("/checkout")
   }
   const notify = () =>
     toast({
@@ -137,10 +156,10 @@ export function ProductDetail({ product }: { product: StoreProduct }) {
       </Button>
     ) : (
       <div className="grid gap-3 sm:grid-cols-2">
-        <Button size="lg" full onClick={addToBag}>
+        <Button size="lg" full onClick={() => void addToBag()} loading={busy.has("add") && !buying}>
           Add to bag
         </Button>
-        <Button size="lg" full variant="dark" onClick={addToBag}>
+        <Button size="lg" full variant="dark" onClick={() => void addToBag(true)} loading={buying}>
           Buy now
         </Button>
       </div>
@@ -180,9 +199,23 @@ export function ProductDetail({ product }: { product: StoreProduct }) {
               ))}
             </div>
           ) : null}
-          <h1 className="font-display text-[clamp(26px,3.6vw,36px)] font-extrabold leading-tight">
-            {product.title}
-          </h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="font-display text-[clamp(26px,3.6vw,36px)] font-extrabold leading-tight">
+              {product.title}
+            </h1>
+            <button
+              type="button"
+              onClick={() => void wishlist.toggle(product.id)}
+              aria-pressed={wishlist.has(product.id)}
+              aria-label={wishlist.has(product.id) ? "Remove from wishlist" : "Add to wishlist"}
+              className="-mr-2 grid size-11 shrink-0 place-items-center rounded-full hover:bg-teal-mist"
+            >
+              <Heart
+                className={wishlist.has(product.id) ? "size-6 fill-sale text-sale" : "size-6"}
+                aria-hidden
+              />
+            </button>
+          </div>
           {meta ? <p className="text-muted">{meta}</p> : null}
           <Price
             pricePaise={rupeesToPaise(price)}
@@ -242,16 +275,28 @@ export function ProductDetail({ product }: { product: StoreProduct }) {
         <form
           noValidate
           className="grid gap-2 rounded-card border border-line bg-surface p-4"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault()
-            setPinMessage(
-              PINCODE.test(pin)
-                ? {
-                    ok: true,
-                    text: "Delivery dates and cash-on-delivery availability will show here once shipping is connected.",
-                  }
-                : { ok: false, text: "Enter a valid 6-digit pincode." },
-            )
+            if (!PINCODE.test(pin))
+              return setPinMessage({ ok: false, text: "Enter a valid 6-digit pincode." })
+            setPinMessage({ ok: true, text: "Checking…" })
+            const r = await lookupPincodeAction(pin)
+            if (!r.ok || !r.info)
+              return setPinMessage({ ok: false, text: r.error ?? "Couldn't check that pincode." })
+            const i = r.info
+            if (!i.serviceable)
+              return setPinMessage({ ok: false, text: `Sorry, we don't deliver to ${pin} yet.` })
+            const fmt = (d: string) =>
+              new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
+            const place = i.city ? `${i.city}: ` : ""
+            setPinMessage({
+              ok: true,
+              text: `${place}delivery by ${fmt(i.delivery.earliest)} to ${fmt(i.delivery.latest)}. ${
+                i.cod_allowed
+                  ? "Cash on delivery available."
+                  : "Cash on delivery not available here."
+              }`,
+            })
           }}
         >
           <label htmlFor="pin" className="text-sm font-semibold">
@@ -354,7 +399,10 @@ export function ProductDetail({ product }: { product: StoreProduct }) {
                 mrpPaise={mrp ? rupeesToPaise(mrp) : undefined}
               />
             </div>
-            <Button onClick={colorSold || allSold ? notify : addToBag} className="shrink-0">
+            <Button
+              onClick={colorSold || allSold ? notify : () => void addToBag()}
+              className="shrink-0"
+            >
               {colorSold || allSold ? "Notify me" : "Add to bag"}
             </Button>
           </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Heart } from "lucide-react"
+import { Heart, Plus } from "lucide-react"
 import { cn } from "../lib/cn"
 import { Badge, type BadgeProps } from "./badge"
 import { Button } from "./button"
@@ -24,6 +24,8 @@ export interface ProductCardProps {
   wishlisted?: boolean
   onWishlistToggle?: () => void
   onNotify?: () => void
+  /** Shows a "Quick add" button on the image that opens a size picker. */
+  onQuickAdd?: () => void
   /** Swap in a router link (for example next/link). */
   linkAs?: React.ElementType
   /** Heading level of the title: 2 on listing pages (under the page h1), 3 under a section h2. */
@@ -45,6 +47,7 @@ export function ProductCard({
   wishlisted,
   onWishlistToggle,
   onNotify,
+  onQuickAdd,
   linkAs: Link = "a",
   headingLevel = 3,
   className,
@@ -55,7 +58,7 @@ export function ProductCard({
       <div className="relative aspect-[4/5] overflow-hidden rounded-card bg-teal-soft shadow-card">
         <div
           className={cn(
-            "size-full transition-transform duration-300 ease-standard group-hover:scale-[1.03]",
+            "relative size-full transition-transform duration-300 ease-standard group-hover:scale-[1.03]",
             soldOut && "opacity-55",
           )}
         >
@@ -85,6 +88,19 @@ export function ProductCard({
           >
             <span className="grid size-9 place-items-center rounded-full bg-white/90 text-navy">
               <Heart className={cn("size-5", wishlisted && "fill-sale text-sale")} aria-hidden />
+            </span>
+          </button>
+        ) : null}
+        {onQuickAdd && !soldOut ? (
+          <button
+            type="button"
+            onClick={onQuickAdd}
+            aria-label={`Quick add ${title} to bag`}
+            className="absolute bottom-2 right-2 z-10 grid h-10 min-w-10 place-items-center gap-1 rounded-full bg-white/95 px-3 text-[13px] font-bold text-navy shadow-card hover:bg-white"
+          >
+            <span className="flex items-center gap-1">
+              <Plus className="size-4" aria-hidden />
+              <span className="hidden sm:inline">Quick add</span>
             </span>
           </button>
         ) : null}

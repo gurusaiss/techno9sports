@@ -5,6 +5,7 @@ import { BreadcrumbNav } from "@/components/breadcrumb-nav"
 import type { StoreProduct } from "@t9/types"
 import { Container } from "@t9/ui"
 import { ProductDetail } from "@/components/product/product-detail"
+import { RecentlyViewed } from "@/components/product/recently-viewed"
 import { RelatedProducts } from "@/components/product/related-products"
 import { getAllProductHandles, getProduct } from "@/lib/catalog"
 import { categoryHref } from "@/lib/nav"
@@ -60,6 +61,7 @@ function Product({ product }: { product: StoreProduct }) {
       <ProductDetail product={product} />
       <Suspense fallback={null}>
         <RelatedProducts product={product} />
+        <RecentlyViewed excludeHandle={product.handle} />
       </Suspense>
       <div className="h-20 lg:hidden" aria-hidden />
     </Container>

@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache"
 import type { CategoryNode, ContentBlock, StoreProduct, StoreTechnology } from "@t9/types"
 import { ApiError, medusa } from "./api"
-import { buildSearchBody, type ListingScope } from "./catalog-query"
+import { buildSearchBody, HIT_FIELDS, type ListingScope } from "./catalog-query"
 import { PAGE_SIZE, type ListingParams } from "./listing-params"
 import { mapSearchResult, type ListingResult } from "./search-result"
 
@@ -128,4 +128,24 @@ export async function getCollections(): Promise<CollectionInfo[]> {
     "/store/collections?limit=100&fields=id,handle,title",
   )
   return res.collections
+}
+
+/** Cards for specific product ids (wishlist). Not cached: the list is the visitor's own. */
+export async function getProductsByIds(ids: string[]): Promise<import("@t9/types").ProductHit[]> {
+  const unique = [...new Set(ids)].slice(0, 100)
+  if (!unique.length) return []
+  const res = await medusa<{ results: Parameters<typeof mapSearchResult>[0][] }>("/store/search", {
+    method: "POST",
+    body: JSON.stringify({
+      entity: "product",
+      fields: [...HIT_FIELDS],
+      filters: { id: { $in: unique } },
+      pagination: { skip: 0, take: unique.length },
+    }),
+    cache: "no-store",
+  })
+  const order = new Map(unique.map((id, i) => [id, i]))
+  return mapSearchResult(res.results[0]!, 1, unique.length).items.sort(
+    (a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0),
+  )
 }

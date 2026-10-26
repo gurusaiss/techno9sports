@@ -1,6 +1,10 @@
 import type { Metadata } from "next"
 import { Manrope, Sora } from "next/font/google"
 import { ToastProvider } from "@t9/ui"
+import { CartDrawerLoader } from "@/components/cart/cart-drawer-loader"
+import { CartProvider } from "@/components/cart/cart-provider"
+import { SessionProvider } from "@/components/session-provider"
+import { WishlistProvider } from "@/components/wishlist-provider"
 import { SiteFooterChrome, SiteHeaderChrome } from "@/components/site-chrome"
 import { getCategoryTree, getPageBlocks, getTechnologies } from "@/lib/catalog"
 import { buildNav } from "@/lib/nav"
@@ -41,11 +45,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <ToastProvider>
-          <SiteHeaderChrome nav={buildNav(tree, technologies)} announcement={announcement} />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <SiteFooterChrome />
+          <SessionProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <SiteHeaderChrome nav={buildNav(tree, technologies)} announcement={announcement} />
+                <main id="main" className="flex-1">
+                  {children}
+                </main>
+                <SiteFooterChrome />
+                <CartDrawerLoader />
+              </WishlistProvider>
+            </CartProvider>
+          </SessionProvider>
         </ToastProvider>
       </body>
     </html>

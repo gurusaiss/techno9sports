@@ -11,6 +11,8 @@ import {
   type SearchSuggestion,
 } from "@t9/ui"
 import { footerColumns, secondaryNav } from "@/config/site"
+import { useCart } from "@/components/cart/cart-provider"
+import { useSession } from "@/components/session-provider"
 
 const RECENT_KEY = "t9.recentSearches"
 const RECENT_EVENT = "t9:recent-searches"
@@ -84,6 +86,8 @@ export function SiteHeaderChrome({
   announcement?: { text: string; href?: string }
 }) {
   const router = useRouter()
+  const { cart, setDrawerOpen } = useCart()
+  const { signedIn } = useSession()
   const recent = React.useSyncExternalStore(subscribeRecent, getRecent, () => EMPTY)
 
   const getSuggestions = React.useCallback(
@@ -104,7 +108,9 @@ export function SiteHeaderChrome({
     <SiteHeader
       nav={nav}
       secondaryNav={secondaryNav}
-      cartCount={0}
+      cartCount={cart?.item_count ?? 0}
+      onCartClick={() => setDrawerOpen(true)}
+      accountHref={signedIn ? "/account" : "/login"}
       linkAs={Link}
       announcement={
         announcement ? (

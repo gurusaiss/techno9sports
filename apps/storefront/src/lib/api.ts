@@ -12,13 +12,15 @@ export class ApiError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    /** The backend's own message for the customer, when it sent one. */
+    readonly detail?: string,
   ) {
     super(message)
     this.name = "ApiError"
   }
 }
 
-/** Server-side call to the Medusa store API. Never sends cookies or user data. */
+/** Server-side call to the Medusa store API. Never sends cookies or user data unless the caller passes them. */
 export async function medusa<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
@@ -29,6 +31,15 @@ export async function medusa<T>(path: string, init: RequestInit = {}): Promise<T
     },
     signal: AbortSignal.timeout(8000),
   })
-  if (!res.ok) throw new ApiError(`Store API ${res.status} for ${path}`, res.status)
+  if (!res.ok) {
+    let detail: string | undefined
+    try {
+      const body = (await res.json()) as { message?: unknown }
+      if (typeof body.message === "string") detail = body.message
+    } catch {
+      /* not JSON */
+    }
+    throw new ApiError(`Store API ${res.status} for ${path}`, res.status, detail)
+  }
   return (await res.json()) as T
 }

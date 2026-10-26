@@ -12,6 +12,8 @@ export interface SiteHeaderProps {
   nav: NavItem[]
   secondaryNav?: NavLink[]
   cartCount?: number
+  /** Opens a bag drawer. Without it (or without JavaScript) the bag icon is a plain link to `cartHref`. */
+  onCartClick?: () => void
   homeHref?: string
   wishlistHref?: string
   accountHref?: string
@@ -36,6 +38,7 @@ export function SiteHeader({
   nav,
   secondaryNav,
   cartCount = 0,
+  onCartClick,
   homeHref = "/",
   wishlistHref = "/wishlist",
   accountHref = "/account",
@@ -99,6 +102,11 @@ export function SiteHeader({
             <Link
               href={cartHref}
               className={iconBtn}
+              onClick={(e: React.MouseEvent) => {
+                if (!onCartClick || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+                e.preventDefault()
+                onCartClick()
+              }}
               aria-label={
                 cartCount > 0
                   ? `Bag, ${cartCount} ${cartCount === 1 ? "item" : "items"}`
