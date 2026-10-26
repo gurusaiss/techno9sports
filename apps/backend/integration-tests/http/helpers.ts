@@ -108,3 +108,34 @@ export async function adminToken(): Promise<string | null> {
 }
 
 export const round2 = (n: number) => Math.round(n * 100) / 100
+
+export async function paymentCollection(cart: string) {
+  const r = await call("GET", `/store/carts/${cart}?fields=*payment_collection`)
+  return r.body.cart.payment_collection?.id as string | undefined
+}
+
+export async function initiatePayment(
+  cart: string,
+  provider: "pp_razorpay_razorpay" | "pp_cod_cod",
+) {
+  let pc = await paymentCollection(cart)
+  if (!pc)
+    pc = (await call("POST", "/store/payment-collections", { cart_id: cart })).body
+      .payment_collection.id
+  const r = await call("POST", `/store/payment-collections/${pc}/payment-sessions`, {
+    provider_id: provider,
+  })
+  const sessions = r.body.payment_collection.payment_sessions as {
+    id: string
+    provider_id: string
+    data: Record<string, unknown>
+  }[]
+  return sessions.find((s) => s.provider_id === provider)!
+}
+
+export const simulateRazorpayPayment = (
+  orderId: string,
+  outcome: "success" | "failure" = "success",
+) => call("POST", "/store/dev/razorpay/simulate", { order_id: orderId, outcome })
+
+export const completeCart = (cart: string) => call("POST", `/store/carts/${cart}/complete`)

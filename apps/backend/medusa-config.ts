@@ -34,6 +34,16 @@ module.exports = defineConfig({
     { resolve: "./src/modules/otp" },
     { resolve: "./src/modules/pincode" },
     { resolve: "./src/modules/wishlist" },
+    { resolve: "./src/modules/webhook-events" },
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [
+          { resolve: "./src/modules/payment-razorpay", id: "razorpay" },
+          { resolve: "./src/modules/payment-cod", id: "cod" },
+        ],
+      },
+    },
     {
       resolve: "@medusajs/medusa/tax",
       options: {

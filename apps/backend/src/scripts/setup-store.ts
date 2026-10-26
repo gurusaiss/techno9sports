@@ -10,6 +10,7 @@ import {
   linkSalesChannelsToStockLocationWorkflow,
   updateShippingOptionsWorkflow,
   updateSalesChannelsWorkflow,
+  updateRegionsWorkflow,
   updateStoresWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { getSetting } from "../lib/settings"
@@ -85,13 +86,26 @@ export default async function setupStore({ container }: ExecArgs) {
             name: "India",
             currency_code: "inr",
             countries: ["in"],
-            payment_providers: ["pp_system_default"],
+            payment_providers: ["pp_razorpay_razorpay", "pp_cod_cod"],
           },
         ],
       },
     })
     region = result[0]!
     logger.info("Created region India")
+  }
+  const { data: regionsWithProviders } = await query.graph({
+    entity: "region",
+    fields: ["id", "payment_providers.id"],
+    filters: { id: region.id },
+  })
+  const wantedProviders = ["pp_razorpay_razorpay", "pp_cod_cod"]
+  const have = new Set((regionsWithProviders[0]?.payment_providers ?? []).map((p) => p?.id))
+  if (wantedProviders.some((p) => !have.has(p))) {
+    await updateRegionsWorkflow(container).run({
+      input: { selector: { id: region.id }, update: { payment_providers: wantedProviders } },
+    })
+    logger.info(`Attached payment providers to the region: ${wantedProviders.join(", ")}`)
   }
   const taxRegions = await taxModule.listTaxRegions({ country_code: "in" })
   if (!taxRegions.length) {
