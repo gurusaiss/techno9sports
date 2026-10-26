@@ -101,7 +101,11 @@ export function toStoreCart(
   const payableItems = r2(cart.item_total)
   const session = cart.payment_collection?.payment_sessions?.[0]
   const payment_method =
-    session?.provider_id === "razorpay" ? "razorpay" : session?.provider_id === "cod" ? "cod" : null
+    session?.provider_id === "pp_razorpay_razorpay"
+      ? "razorpay"
+      : session?.provider_id === "pp_cod_cod"
+        ? "cod"
+        : null
   const cod_fee = payment_method === "cod" && settings.cod.enabled ? settings.cod.fee : 0
 
   const promotions: CartPromotion[] = (cart.promotions ?? []).map((p) => ({

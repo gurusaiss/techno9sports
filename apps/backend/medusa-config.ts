@@ -35,6 +35,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/pincode" },
     { resolve: "./src/modules/wishlist" },
     { resolve: "./src/modules/webhook-events" },
+    { resolve: "./src/modules/invoices" },
     {
       resolve: "@medusajs/medusa/payment",
       options: {

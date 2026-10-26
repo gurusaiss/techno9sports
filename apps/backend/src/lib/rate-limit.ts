@@ -45,5 +45,8 @@ export const LIMITS = {
   couponIp: { name: "coupon-ip", max: 20, windowMs: 10 * 60_000 },
   pincodeIp: { name: "pincode-ip", max: 60, windowMs: 60_000 },
   checkoutIp: { name: "checkout-ip", max: 40, windowMs: 10 * 60_000 },
+  codOtpRequestPhone: { name: "cod-otp-req-phone", max: 3, windowMs: 10 * 60_000 },
+  codOtpRequestIp: { name: "cod-otp-req-ip", max: 15, windowMs: 10 * 60_000 },
+  codOtpVerifyIp: { name: "cod-otp-verify-ip", max: 30, windowMs: 10 * 60_000 },
   webhookIp: { name: "webhook-ip", max: 600, windowMs: 60_000 },
 } satisfies Record<string, Limit>

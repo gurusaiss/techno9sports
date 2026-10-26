@@ -5,3 +5,4 @@ export type Paise = number
 
 export * from "./catalog"
 export * from "./cart"
+export * from "./order"

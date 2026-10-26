@@ -1,4 +1,5 @@
 import {
+  ADDRESS_AP,
   addItem,
   call,
   chooseShipping,
@@ -7,6 +8,8 @@ import {
   getCart,
   initiatePayment,
   newCart,
+  paymentCollection,
+  region,
   simulateRazorpayPayment,
   variants,
 } from "./helpers"
@@ -90,6 +93,45 @@ describeLive("payments", () => {
     const r = await completeCart(cart)
     expect(r.status).toBe(200)
     expect(r.body.type).toBe("order")
+  })
+
+  it("a COD order records the handling fee on top of its total, not folded into it", async () => {
+    const cart = await readyCart()
+    await initiatePayment(cart, "pp_cod_cod")
+    const r = await completeCart(cart)
+    expect(r.status).toBe(200)
+    const orderId = r.body.order.id as string
+    let order: Record<string, unknown> | undefined
+    for (let i = 0; i < 10 && !order?.cod_fee; i++) {
+      await new Promise((res) => setTimeout(res, 500))
+      order = (await call("GET", `/store/orders/${orderId}`)).body.order
+    }
+    expect(order?.payment_method).toBe("cod")
+    expect(order?.cod_fee).toBeGreaterThan(0)
+    expect(order?.payable).toBe((order?.total as number) + (order?.cod_fee as number))
+  }, 15000)
+
+  it("COD OTP: a cart with no shipping address can't request a code", async () => {
+    const region_id = await region()
+    const cart = (
+      await call("POST", "/store/carts", { region_id, email: `nophone-${Date.now()}@example.com` })
+    ).body.cart.id as string
+    await addItem(cart, cheap.id, 1)
+    const r = await call("POST", `/store/catalog/cart/${cart}/cod-otp/request`)
+    expect(r.status).toBe(400)
+  })
+
+  it("COD OTP: a wrong code is rejected and no session is created", async () => {
+    // A phone unique to this test run avoids colliding with the shared ADDRESS_AP number's own
+    // (deliberately tight) per-phone OTP rate limit across repeated suite runs.
+    const phone = `9${String(Date.now()).slice(-9)}`
+    const cart = await readyCart()
+    await call("POST", `/store/carts/${cart}`, { shipping_address: { ...ADDRESS_AP, phone } })
+    const req = await call("POST", `/store/catalog/cart/${cart}/cod-otp/request`)
+    expect(req.status).toBe(200)
+    const bad = await call("POST", `/store/catalog/cart/${cart}/cod-otp/verify`, { code: "000000" })
+    expect(bad.status).toBe(401)
+    expect(await paymentCollection(cart)).toBeUndefined()
   })
 
   it("the webhook alone completes an order, even if the client never calls back", async () => {

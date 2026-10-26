@@ -100,7 +100,9 @@ describe("toStoreCart", () => {
   it("adds the COD fee once a COD session is on the cart", () => {
     const c = toStoreCart(
       raw({
-        payment_collection: { payment_sessions: [{ provider_id: "cod", status: "pending" }] },
+        payment_collection: {
+          payment_sessions: [{ provider_id: "pp_cod_cod", status: "pending" }],
+        },
       }),
       settings,
     )

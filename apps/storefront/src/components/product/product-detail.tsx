@@ -60,6 +60,10 @@ export function ProductDetail({ product }: { product: StoreProduct }) {
   }, [product])
   const colors = product.options.find((o) => o.title === "Color")?.values ?? []
   const sizes = product.options.find((o) => o.title === "Size")?.values ?? []
+  // A product with no real choice to make (no Size option, or a single "One size" variant) never
+  // shows the size selector, so `size` state would otherwise stay null forever and block adding to
+  // bag; this resolves to the one size that actually matches a variant in that case.
+  const singleSize = sizes.length === 1 ? sizes[0] : null
 
   const firstInStockColor =
     colors.find((c) =>
@@ -103,7 +107,7 @@ export function ProductDetail({ product }: { product: StoreProduct }) {
     if (size && variantFor(product, size, c)?.availability.status === "out_of_stock") setSize(null)
   }
 
-  const variant = variantFor(product, size, color)
+  const variant = variantFor(product, size ?? singleSize, color)
   const soldOutSize = (s: string) => {
     const v = variantFor(product, s, color)
     return !v || v.availability.status === "out_of_stock"
@@ -129,7 +133,7 @@ export function ProductDetail({ product }: { product: StoreProduct }) {
   const colorSold = colorOptions.find((c) => c.value === color)?.soldOut ?? false
 
   const requireSize = (): boolean => {
-    if (size) return true
+    if (size || sizes.length === 0 || singleSize) return true
     setSizeError(true)
     sizeGroupRef.current?.scrollIntoView({ block: "center", behavior: "smooth" })
     sizeGroupRef.current?.querySelector<HTMLElement>('[role="radio"]:not([disabled])')?.focus()

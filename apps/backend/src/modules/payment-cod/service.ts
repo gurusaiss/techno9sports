@@ -22,21 +22,32 @@ import type {
   WebhookActionResult,
 } from "@medusajs/framework/types"
 import { MedusaError, PaymentActions, PaymentSessionStatus } from "@medusajs/framework/utils"
+import { assertCodEligible } from "../../lib/cod-eligibility-raw"
 
 /**
- * Cash on delivery: no money moves online. The session authorizes immediately (eligibility — the
- * limit, blocked pincodes, OTP — is enforced by the checkout route before this is ever reached);
- * "capture" happens when the parcel is marked delivered in admin (Phase 6), "refund" is a manual
- * bank transfer the admin records (Phase 5/6), not an API call.
+ * Cash on delivery: no money moves online. Eligibility (the order-value cap, blocked pincodes) is
+ * re-checked here, inside `initiatePayment`, so a COD session can never be created outside the
+ * rules even if the storefront's own (friendlier, earlier) check is bypassed; "capture" happens
+ * when the parcel is marked delivered in admin (Phase 6), "refund" is a manual bank transfer the
+ * admin records (Phase 5/6), not an API call.
  */
 export default class CodProviderService implements IPaymentProvider {
   static identifier = "cod"
+  private container_: { __pg_connection__: unknown }
+
+  constructor(container: { __pg_connection__: unknown }) {
+    this.container_ = container
+  }
 
   getIdentifier() {
     return CodProviderService.identifier
   }
 
   async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
+    await assertCodEligible(this.container_ as Parameters<typeof assertCodEligible>[0], {
+      total: Number(input.amount),
+      postalCode: (input.data?.postal_code as string | undefined) ?? null,
+    })
     return {
       id: String(input.data?.session_id ?? ""),
       data: { ...input.data, method: "cod" },

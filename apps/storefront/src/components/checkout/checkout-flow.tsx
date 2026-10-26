@@ -25,6 +25,7 @@ import {
   type PincodeNote,
 } from "@/components/account/address-form"
 import { Field } from "@/components/account/field"
+import { PaymentStep } from "@/components/checkout/payment-step"
 import { inr } from "@/lib/format-money"
 import type { CustomerAddress } from "@/lib/customer"
 import type { ShippingOption } from "@/lib/store"
@@ -352,18 +353,7 @@ export function CheckoutFlow({
 
         <section aria-labelledby="step-3" className="grid gap-4">
           <StepHeader n={3} title="Payment" active={step === 3} done={false} />
-          {step === 3 ? (
-            <div className="grid gap-3 rounded-card border border-dashed border-line-strong p-5">
-              <p className="font-semibold">Your total is {inr(cart.total)}.</p>
-              <p className="text-sm text-muted">
-                Payment by UPI, card, netbanking and cash on delivery is switched on in the next
-                phase. Your details and delivery choice are saved.
-              </p>
-              <Button size="lg" full disabled aria-disabled>
-                Pay {inr(cart.total)}
-              </Button>
-            </div>
-          ) : null}
+          {step === 3 ? <PaymentStep cart={cart} onCartUpdate={replace} /> : null}
         </section>
       </div>
 
