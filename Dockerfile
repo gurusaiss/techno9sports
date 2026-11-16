@@ -23,6 +23,10 @@ RUN pnpm build
 
 FROM node:22-slim AS runner
 RUN corepack enable
+# .medusa/server's generated package.json has no packageManager field, so without this
+# Corepack fetches whatever the latest pnpm major is instead of the version (and its
+# onlyBuiltDependencies behavior) the rest of this repo is pinned to and tested against.
+RUN corepack prepare pnpm@10.28.0 --activate
 WORKDIR /app
 ENV NODE_ENV=production
 
