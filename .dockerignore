@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+**/.next
+**/.medusa
+**/.turbo
+**/dist
+**/out
+.git
+.env
+.env.local
+**/.env
+**/.env.local
+apps/storefront

@@ -1,0 +1,26 @@
+# Fly app for the Medusa backend (API + Admin on :9000).
+# Replace `app` with your globally-unique app name before first deploy
+# (fly launch will offer to do this for you).
+
+app = "techno9sports-backend"
+primary_region = "bom"
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  PORT = "9000"
+  MEDUSA_ADMIN_ONBOARDING_TYPE = "default"
+
+[http_service]
+  internal_port = 9000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
