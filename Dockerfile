@@ -30,7 +30,9 @@ COPY --from=build /app/apps/backend/.medusa/server ./
 # @t9/types is only used via `import type`, erased at compile time, but medusa build
 # still lists it (workspace:*) in the generated package.json, which can't resolve
 # outside the monorepo. Strip any workspace: deps before the standalone install.
-RUN node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));for(const k of ['dependencies','devDependencies']){if(p[k])for(const d of Object.keys(p[k]))if(String(p[k][d]).startsWith('workspace:'))delete p[k][d];}fs.writeFileSync('package.json',JSON.stringify(p,null,2));"
+# Also allow lifecycle/build scripts for native deps pnpm 10 blocks by default outside
+# a workspace (no pnpm-workspace.yaml here to carry the root's onlyBuiltDependencies).
+RUN node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));for(const k of ['dependencies','devDependencies']){if(p[k])for(const d of Object.keys(p[k]))if(String(p[k][d]).startsWith('workspace:'))delete p[k][d];}p.pnpm=p.pnpm||{};p.pnpm.onlyBuiltDependencies=['@medusajs/telemetry','@swc/core','esbuild','sharp','unrs-resolver','msgpackr-extract','protobufjs','core-js'];fs.writeFileSync('package.json',JSON.stringify(p,null,2));"
 RUN pnpm install --prod
 
 EXPOSE 9000
