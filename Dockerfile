@@ -13,6 +13,12 @@ COPY apps/backend ./apps/backend
 RUN pnpm install --frozen-lockfile
 
 WORKDIR /app/apps/backend
+# medusa-config.ts picks the search provider at build time based on MEILISEARCH_HOST.
+# Without it set, it falls back to @medusajs/medusa/search-local, whose subpath doesn't
+# resolve under pnpm's strict node_modules layout. Any truthy value steers the build to
+# the real (./src/modules/search-meilisearch) provider instead; the real host/key are set
+# as runtime secrets separately and used at request time, not baked into this build.
+ENV MEILISEARCH_HOST=https://build-placeholder.invalid
 RUN pnpm build
 
 FROM node:22-slim AS runner
