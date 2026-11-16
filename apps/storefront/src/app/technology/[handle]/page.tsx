@@ -24,7 +24,7 @@ export async function generateMetadata(
 
 export default async function Page(props: PageProps<"/technology/[handle]">) {
   const { handle } = await props.params
-  const t = (await getTechnologies()).find((x) => x.handle === handle)
+  const t = (await safe(getTechnologies, [])).find((x) => x.handle === handle)
   if (!t) notFound()
   return (
     <Suspense fallback={<ListingSkeleton />}>

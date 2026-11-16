@@ -71,7 +71,7 @@ function Product({ product }: { product: StoreProduct }) {
 export default async function Page(props: PageProps<"/products/[handle]">) {
   // Resolved before anything streams, so an unknown handle is a real 404, not a soft one.
   const { handle } = await props.params
-  const product = await getProduct(handle)
+  const product = await safe(() => getProduct(handle), null)
   if (!product) notFound()
   return <Product product={product} />
 }

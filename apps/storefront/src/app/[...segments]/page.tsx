@@ -15,7 +15,7 @@ export async function generateStaticParams() {
 }
 
 async function lookup(segments: string[]) {
-  const tree = await getCategoryTree()
+  const tree = await safe(getCategoryTree, [])
   const handle = resolveCategoryHandle(segments, tree)
   if (!handle) return null
   const top = tree.find((t) => handle === t.handle || handle.startsWith(`${t.handle}-`))!
