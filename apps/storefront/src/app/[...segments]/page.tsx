@@ -8,18 +8,25 @@ import { safe } from "@/lib/safe"
 
 export async function generateStaticParams() {
   const tree = await safe(getCategoryTree, [])
-  return tree.flatMap((top) => [
-    { segments: [top.handle] },
-    ...top.children.map((c) => ({ segments: [top.handle, c.handle.slice(top.handle.length + 1)] })),
-  ])
+  if (tree.length > 0) {
+    return tree.flatMap((top) => [
+      { segments: [top.handle] },
+      ...top.children.map((c) => ({
+        segments: [top.handle, c.handle.slice(top.handle.length + 1)],
+      })),
+    ])
+  }
+  return [{ segments: ["_placeholder"] }]
 }
 
 async function lookup(segments: string[]) {
   const tree = await safe(getCategoryTree, [])
   const handle = resolveCategoryHandle(segments, tree)
   if (!handle) return null
-  const top = tree.find((t) => handle === t.handle || handle.startsWith(`${t.handle}-`))!
-  const node = handle === top.handle ? top : top.children.find((c) => c.handle === handle)!
+  const top = tree.find((t) => handle === t.handle || handle.startsWith(`${t.handle}-`))
+  if (!top) return null
+  const node = handle === top.handle ? top : top.children?.find((c) => c.handle === handle)
+  if (!node) return null
   return { top, node, handle }
 }
 

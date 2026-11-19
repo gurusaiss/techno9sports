@@ -2,18 +2,15 @@ import { loadEnv, defineConfig } from "@medusajs/framework/utils"
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd())
 
-// Search: Meilisearch when MEILISEARCH_HOST is set, otherwise the in-memory local provider
-// (tests and quick starts). The storefront only talks to /store/search, so the engine is swappable.
-const searchProvider = process.env.MEILISEARCH_HOST
-  ? {
-      resolve: "./src/modules/search-meilisearch",
-      id: "meilisearch",
-      options: {
-        host: process.env.MEILISEARCH_HOST,
-        apiKey: process.env.MEILISEARCH_API_KEY ?? "",
-      },
-    }
-  : { resolve: "@medusajs/medusa/search-local", id: "local" }
+// Search: Meilisearch provider. The storefront only talks to /store/search, so the engine is swappable.
+const searchProvider = {
+  resolve: "./src/modules/search-meilisearch",
+  id: "meilisearch",
+  options: {
+    host: process.env.MEILISEARCH_HOST || "http://localhost:7700",
+    apiKey: process.env.MEILISEARCH_API_KEY ?? "",
+  },
+}
 
 module.exports = defineConfig({
   projectConfig: {

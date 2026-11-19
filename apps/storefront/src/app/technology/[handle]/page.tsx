@@ -6,7 +6,11 @@ import { getTechnologies } from "@/lib/catalog"
 import { safe } from "@/lib/safe"
 
 export async function generateStaticParams() {
-  return (await safe(getTechnologies, [])).map((t) => ({ handle: t.handle }))
+  const technologies = await safe(getTechnologies, [])
+  if (technologies.length > 0) {
+    return technologies.map((t) => ({ handle: t.handle }))
+  }
+  return [{ handle: "_placeholder" }]
 }
 
 export async function generateMetadata(

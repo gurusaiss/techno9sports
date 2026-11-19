@@ -1,7 +1,12 @@
 import type { NextConfig } from "next"
 
 // Product media is served by the Medusa file provider (local disk in dev, Azure Blob + CDN later).
-const media = new URL(process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL ?? "http://localhost:9000")
+const mediaUrl =
+  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL &&
+  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL.trim() !== ""
+    ? process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
+    : "http://localhost:9000"
+const media = new URL(mediaUrl)
 
 const nextConfig: NextConfig = {
   cacheComponents: true,

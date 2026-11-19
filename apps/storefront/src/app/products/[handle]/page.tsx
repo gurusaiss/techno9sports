@@ -14,7 +14,10 @@ import { breadcrumbJsonLd, jsonLdString, productJsonLd } from "@/lib/seo"
 
 export async function generateStaticParams() {
   const handles = await safe(getAllProductHandles, [])
-  return handles.slice(0, 300).map((h) => ({ handle: h.handle }))
+  if (handles.length > 0) {
+    return handles.slice(0, 300).map((h) => ({ handle: h.handle }))
+  }
+  return [{ handle: "_placeholder" }]
 }
 
 export async function generateMetadata(props: PageProps<"/products/[handle]">): Promise<Metadata> {
